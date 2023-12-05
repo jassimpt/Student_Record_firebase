@@ -20,4 +20,12 @@ class DatabaseService {
   addStudent(StudentModel student) async {
     studentref.add(student);
   }
+
+  deleteStudent(id) async {
+    studentref.doc(id).delete();
+  }
+
+  updateStudent(id, StudentModel student) async {
+    studentref.doc(id).update(student.toJson());
+  }
 }

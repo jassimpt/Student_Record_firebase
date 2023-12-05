@@ -8,14 +8,35 @@ import 'package:student_record/controller/imagepicker_provider.dart';
 import 'package:student_record/models/studentmodel.dart';
 import 'package:student_record/service/database_service.dart';
 
-class AddDialog extends StatelessWidget {
-  AddDialog({
-    super.key,
-  });
+class EditDialog extends StatefulWidget {
+  StudentModel student;
+  String id;
+  EditDialog({super.key, required this.id, required this.student});
+
+  @override
+  State<EditDialog> createState() => _EditDialogState();
+}
+
+class _EditDialogState extends State<EditDialog> {
   TextEditingController namecontroller = TextEditingController();
+
   TextEditingController agecontroller = TextEditingController();
+
   TextEditingController addresscontroller = TextEditingController();
+
   TextEditingController coursecontroller = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    namecontroller = TextEditingController(text: widget.student.name);
+    agecontroller = TextEditingController(text: widget.student.age);
+    addresscontroller = TextEditingController(text: widget.student.address);
+    coursecontroller = TextEditingController(text: widget.student.course);
+    Provider.of<ImagePickerProvider>(context, listen: false).selectedimage =
+        File(widget.student.image!);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +50,7 @@ class AddDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Add Student',
+                'Edit Student',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(
@@ -103,7 +124,7 @@ class AddDialog extends StatelessWidget {
                 children: [
                   TextButton(
                       onPressed: () {
-                        addStudent(context);
+                        editStudent(context);
                       },
                       child: const Text('Save')),
                   TextButton(
@@ -120,22 +141,22 @@ class AddDialog extends StatelessWidget {
     );
   }
 
-  addStudent(context) {
-    final name = namecontroller.text;
-    final age = agecontroller.text;
-    final address = addresscontroller.text;
-    final course = coursecontroller.text;
+  editStudent(context) {
+    final editedname = namecontroller.text;
+    final editedage = agecontroller.text;
+    final editedaddress = addresscontroller.text;
+    final editedcourse = coursecontroller.text;
 
-    final student = StudentModel(
-        address: address,
-        name: name,
-        age: age,
-        course: course,
+    final updatedstudent = StudentModel(
         image: Provider.of<ImagePickerProvider>(context, listen: false)
             .selectedimage!
-            .path);
+            .path,
+        address: editedaddress,
+        name: editedname,
+        age: editedage,
+        course: editedcourse);
 
-    DatabaseService().addStudent(student);
+    DatabaseService().updateStudent(widget.id, updatedstudent);
     Navigator.pop(context);
   }
 }
