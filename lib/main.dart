@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:student_record/controller/imagepicker_provider.dart';
+import 'package:student_record/controller/Basic_provider.dart';
 import 'package:student_record/firebase_options.dart';
 import 'package:student_record/views/homescreen.dart';
 
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => ImagePickerProvider(),
+          create: (context) => BasicProvider(),
         )
       ],
       child: MaterialApp(

@@ -1,10 +1,7 @@
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:student_record/controller/imagepicker_provider.dart';
+import 'package:student_record/controller/Basic_provider.dart';
 import 'package:student_record/models/studentmodel.dart';
 import 'package:student_record/service/database_service.dart';
 
@@ -12,14 +9,16 @@ class AddDialog extends StatelessWidget {
   AddDialog({
     super.key,
   });
+
   TextEditingController namecontroller = TextEditingController();
+
   TextEditingController agecontroller = TextEditingController();
+
   TextEditingController addresscontroller = TextEditingController();
-  TextEditingController coursecontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final image = Provider.of<ImagePickerProvider>(context);
+    final image = Provider.of<BasicProvider>(context);
     return Dialog(
       child: Container(
         child: Padding(
@@ -90,10 +89,21 @@ class AddDialog extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
-              TextFormField(
-                controller: coursecontroller,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(), hintText: 'Course'),
+              Consumer<BasicProvider>(
+                builder: (context, basepro, child) {
+                  return DropdownButton<String>(
+                    value: basepro.selectedcourse,
+                    items: basepro.courses.map((course) {
+                      return DropdownMenuItem<String>(
+                        child: Text(course),
+                        value: course,
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      basepro.dropDownchanger(value);
+                    },
+                  );
+                },
               ),
               const SizedBox(
                 height: 10,
@@ -124,16 +134,14 @@ class AddDialog extends StatelessWidget {
     final name = namecontroller.text;
     final age = agecontroller.text;
     final address = addresscontroller.text;
-    final course = coursecontroller.text;
+    final pro = Provider.of<BasicProvider>(context, listen: false);
 
     final student = StudentModel(
         address: address,
         name: name,
         age: age,
-        course: course,
-        image: Provider.of<ImagePickerProvider>(context, listen: false)
-            .selectedimage!
-            .path);
+        course: pro.selectedcourse,
+        image: pro.selectedimage!.path);
 
     DatabaseService().addStudent(student);
     Navigator.pop(context);

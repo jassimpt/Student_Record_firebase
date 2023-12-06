@@ -1,10 +1,8 @@
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:student_record/controller/imagepicker_provider.dart';
+import 'package:student_record/controller/Basic_provider.dart';
 import 'package:student_record/models/studentmodel.dart';
 import 'package:student_record/service/database_service.dart';
 
@@ -34,13 +32,15 @@ class _EditDialogState extends State<EditDialog> {
     agecontroller = TextEditingController(text: widget.student.age);
     addresscontroller = TextEditingController(text: widget.student.address);
     coursecontroller = TextEditingController(text: widget.student.course);
-    Provider.of<ImagePickerProvider>(context, listen: false).selectedimage =
+    Provider.of<BasicProvider>(context, listen: false).selectedcourse =
+        widget.student.course;
+    Provider.of<BasicProvider>(context, listen: false).selectedimage =
         File(widget.student.image!);
   }
 
   @override
   Widget build(BuildContext context) {
-    final image = Provider.of<ImagePickerProvider>(context);
+    final image = Provider.of<BasicProvider>(context);
     return Dialog(
       child: Container(
         child: Padding(
@@ -111,10 +111,21 @@ class _EditDialogState extends State<EditDialog> {
               const SizedBox(
                 height: 10,
               ),
-              TextFormField(
-                controller: coursecontroller,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(), hintText: 'Course'),
+              Consumer<BasicProvider>(
+                builder: (context, basepro, child) {
+                  return DropdownButton<String>(
+                    value: basepro.selectedcourse,
+                    items: basepro.courses.map((course) {
+                      return DropdownMenuItem<String>(
+                        child: Text(course),
+                        value: course,
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      basepro.dropDownchanger(value);
+                    },
+                  );
+                },
               ),
               const SizedBox(
                 height: 10,
@@ -142,15 +153,14 @@ class _EditDialogState extends State<EditDialog> {
   }
 
   editStudent(context) {
+    final pro = Provider.of<BasicProvider>(context, listen: false);
     final editedname = namecontroller.text;
     final editedage = agecontroller.text;
     final editedaddress = addresscontroller.text;
-    final editedcourse = coursecontroller.text;
+    final editedcourse = pro.selectedcourse;
 
     final updatedstudent = StudentModel(
-        image: Provider.of<ImagePickerProvider>(context, listen: false)
-            .selectedimage!
-            .path,
+        image: pro.selectedimage!.path,
         address: editedaddress,
         name: editedname,
         age: editedage,
