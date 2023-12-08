@@ -4,6 +4,7 @@ class StudentModel {
   String? course;
   String? age;
   String? image;
+  String? id;
   StudentModel({
     required this.image,
     required this.address,
@@ -19,16 +20,6 @@ class StudentModel {
         name: json["name"],
         age: json['age'] as String,
         course: json['course']);
-  }
-
-  StudentModel copyWith(
-      {String? name, String? address, String? course, String? age}) {
-    return StudentModel(
-        image: image ?? this.image,
-        address: address ?? this.address,
-        name: name ?? this.name,
-        age: age ?? this.age,
-        course: course ?? this.course);
   }
 
   Map<String, dynamic> toJson() {

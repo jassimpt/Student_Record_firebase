@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:student_record/controller/Basic_provider.dart';
+import 'package:student_record/controller/data_provider.dart';
 import 'package:student_record/models/studentmodel.dart';
-import 'package:student_record/service/database_service.dart';
 
 class AddDialog extends StatelessWidget {
   AddDialog({
@@ -19,6 +21,7 @@ class AddDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final image = Provider.of<BasicProvider>(context);
+
     return Dialog(
       child: Container(
         child: Padding(
@@ -130,20 +133,21 @@ class AddDialog extends StatelessWidget {
     );
   }
 
-  addStudent(context) {
+  addStudent(context) async {
+    final pro = Provider.of<BasicProvider>(context, listen: false);
+    final prodata = Provider.of<DataProvider>(context, listen: false);
+
     final name = namecontroller.text;
     final age = agecontroller.text;
     final address = addresscontroller.text;
-    final pro = Provider.of<BasicProvider>(context, listen: false);
-
+    await prodata.imageUploader(File(pro.selectedimage!.path));
     final student = StudentModel(
         address: address,
         name: name,
         age: age,
         course: pro.selectedcourse,
-        image: pro.selectedimage!.path);
-
-    DatabaseService().addStudent(student);
+        image: prodata.downloadurl);
+    prodata.addStudent(student);
     Navigator.pop(context);
   }
 }

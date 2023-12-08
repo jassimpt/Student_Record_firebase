@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
+import 'package:student_record/controller/data_provider.dart';
 import 'package:student_record/models/studentmodel.dart';
-import 'package:student_record/service/database_service.dart';
+
 import 'package:student_record/views/widgets/add_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:student_record/views/widgets/edit_dialogue.dart';
@@ -12,7 +14,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DatabaseService databaseService = DatabaseService();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -35,52 +36,55 @@ class HomeScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SizedBox(
-                // height: 300,
-                child: StreamBuilder(
-                  stream: databaseService.getStudents(),
-                  builder: (context, snapshot) {
-                    List studentdata = snapshot.data?.docs ?? [];
-                    if (studentdata.isEmpty) {
-                      return const Center(
-                        child: Text('Add Student'),
-                      );
-                    }
-                    return ListView.builder(
-                      itemCount: studentdata.length,
-                      itemBuilder: (context, index) {
-                        StudentModel student = studentdata[index].data();
-                        final id = studentdata[index].id;
-                        print(student.name);
-                        return ListTile(
-                          leading: CircleAvatar(
-                            radius: 30,
-                            backgroundImage: FileImage(File(student.image!)),
-                          ),
-                          title: Text(student.name!),
-                          subtitle: Text(student.course!),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return EditDialog(
-                                          id: id,
-                                          student: student,
+                child: Consumer<DataProvider>(
+                  builder: (context, value, child) {
+                    return StreamBuilder(
+                      stream: value.getStudents(),
+                      builder: (context, snapshot) {
+                        List studentdata = snapshot.data?.docs ?? [];
+                        if (studentdata.isEmpty) {
+                          return const Center(
+                            child: Text('Add Student'),
+                          );
+                        }
+                        return ListView.builder(
+                          itemCount: studentdata.length,
+                          itemBuilder: (context, index) {
+                            StudentModel student = studentdata[index].data();
+                            final id = studentdata[index].id;
+
+                            return ListTile(
+                              leading: CircleAvatar(
+                                  radius: 30,
+                                  backgroundImage:
+                                      NetworkImage(student.image!)),
+                              title: Text(student.name!),
+                              subtitle: Text(student.course!),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return EditDialog(
+                                              id: id,
+                                              student: student,
+                                            );
+                                          },
                                         );
                                       },
-                                    );
-                                  },
-                                  icon: const Icon(Iconsax.edit)),
-                              IconButton(
-                                  onPressed: () {
-                                    databaseService.deleteStudent(id);
-                                  },
-                                  icon: const Icon(Iconsax.profile_delete)),
-                            ],
-                          ),
+                                      icon: const Icon(Iconsax.edit)),
+                                  IconButton(
+                                      onPressed: () {
+                                        value.deleteStudent(id);
+                                      },
+                                      icon: const Icon(Iconsax.profile_delete)),
+                                ],
+                              ),
+                            );
+                          },
                         );
                       },
                     );

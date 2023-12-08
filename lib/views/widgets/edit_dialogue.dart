@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:student_record/controller/Basic_provider.dart';
+import 'package:student_record/controller/data_provider.dart';
 import 'package:student_record/models/studentmodel.dart';
 import 'package:student_record/service/database_service.dart';
 
@@ -154,6 +155,7 @@ class _EditDialogState extends State<EditDialog> {
 
   editStudent(context) {
     final pro = Provider.of<BasicProvider>(context, listen: false);
+    final prodata = Provider.of<DataProvider>(context, listen: false);
     final editedname = namecontroller.text;
     final editedage = agecontroller.text;
     final editedaddress = addresscontroller.text;
@@ -166,7 +168,7 @@ class _EditDialogState extends State<EditDialog> {
         age: editedage,
         course: editedcourse);
 
-    DatabaseService().updateStudent(widget.id, updatedstudent);
+    prodata.updateStudent(widget.id, updatedstudent);
     Navigator.pop(context);
   }
 }
