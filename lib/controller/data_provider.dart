@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +16,9 @@ class DataProvider extends ChangeNotifier {
   }
 
   imageUploader(image) async {
+    Reference childfolder = _databaseService.root.child('images');
+    Reference? imageUpload = childfolder.child("${uniquename}.jpg");
     try {
-      Reference childfolder = _databaseService.root.child('images');
-      Reference? imageUpload = childfolder.child("${uniquename}.jpg");
       await imageUpload.putFile(image);
       downloadurl = await imageUpload.getDownloadURL();
       print(downloadurl);
@@ -26,15 +27,37 @@ class DataProvider extends ChangeNotifier {
     }
   }
 
+  updateImage(imageurl, newimage) async {
+    try {
+      if (newimage != null && newimage.existsSync()) {
+        Reference storedimage = FirebaseStorage.instance.refFromURL(imageurl);
+        await storedimage.putFile(newimage);
+        downloadurl = await storedimage.getDownloadURL();
+      } else {
+        downloadurl = imageurl;
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  deleteImage(imageurl) async {
+    Reference storedimage = FirebaseStorage.instance.refFromURL(imageurl);
+    await storedimage.delete();
+  }
+
   addStudent(StudentModel student) async {
     _databaseService.studentref.add(student);
+    notifyListeners();
   }
 
   deleteStudent(id) async {
     _databaseService.studentref.doc(id).delete();
+    notifyListeners();
   }
 
   updateStudent(id, StudentModel student) async {
     _databaseService.studentref.doc(id).update(student.toJson());
+    notifyListeners();
   }
 }

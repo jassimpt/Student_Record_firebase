@@ -79,6 +79,7 @@ class HomeScreen extends StatelessWidget {
                                   IconButton(
                                       onPressed: () {
                                         value.deleteStudent(id);
+                                        value.deleteImage(student.image);
                                       },
                                       icon: const Icon(Iconsax.profile_delete)),
                                 ],
